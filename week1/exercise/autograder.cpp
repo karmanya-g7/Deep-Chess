@@ -9,8 +9,42 @@ using namespace std;
 */
 
 string solve(int n, vector<long long> a) {
+    using ll = long long;
+    string p1 = "Player 1";
+    string p2 = "Player 2";
+    string p3 = "Draw";
     // TODO: Fill this function.
     // Return one of: "Player 1" or "Player 2" or "Draw"
+    if(n>=3){
+        vector<ll> d(n);
+        d[n-1] = a[n-1];
+        d[n-2] = max(a[n-2]-d[n-1],a[n-2]+a[n-1]);
+        for(int i = n-3;i>=0;i--){
+            d[i] = max(a[i]+a[i+1]-d[i+2],a[i]-d[i+1]);
+        }
+        if(d[0] >0){
+            return p1;
+        }
+        else if(d[0]<0){
+            return p2;
+        }
+        else return p3;
+    }
+    if(n==2){
+        int sum = a[0] + a[1];
+        if((sum > 0) || (a[0]>0 &&a[1]<0) || (a[0]>a[1])){
+            return p1;
+        }
+        else if(a[0]<a[1]){
+            return p2;
+        }
+        else return p3;
+    }
+    if(n==1){
+        if(a[0] > 0) return p1;
+        else if (a[0] < 0) return p2;
+        else return p3;
+    }
 
     return "";
 }
