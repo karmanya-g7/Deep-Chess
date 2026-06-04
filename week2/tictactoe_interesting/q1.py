@@ -151,19 +151,7 @@ def backward_induction(history_obj):
     :return: best achievable utility (float) for th current history_obj
     """
     global strategy_dict_x, strategy_dict_o
-    # TODO implement
-    # (1) Implement backward induction for tictactoe
-    # (2) Update the global variables strategy_dict_x or strategy_dict_o which are a mapping from histories to
-    # probability distribution over actions.
-    # (2a)These are dictionary with keys as string representation of the history list e.g. if the history list of the
-    # history_obj is [0, 4, 2, 5], then the key is "0425". Each value is in turn a dictionary with keys as actions 0-8
-    # (str "0", "1", ..., "8") and each value of this dictionary is a float (representing the probability of
-    # choosing that action). Example: {”0452”: {”0”: 0, ”1”: 0, ”2”: 0, ”3”: 0, ”4”: 0, ”5”: 0, ”6”: 1, ”7”: 0, ”8”:
-    # 0}}
-    # (2b) Note, the strategy for each history in strategy_dict_x and strategy_dict_o is probability distribution over
-    # actions. But since tictactoe is a PIEFG, there always exists an optimal deterministic strategy (SPNE). So your
-    # policy will be something like this {"0": 1, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0} where
-    # "0" was the one of the best actions for the current player/history.
+
     def alphabeta(position,alpha,beta):
         if position.is_terminal_history():
             return position.get_utility_given_terminal_history()
@@ -179,7 +167,6 @@ def backward_induction(history_obj):
 
                 if value > best_value:
                     best_value = value
-                    best_action = p
 
                 alpha = max(best_value,alpha)
 
@@ -195,40 +182,51 @@ def backward_induction(history_obj):
 
                 if value < best_value:
                     best_value = value
-                    best_action = p
 
                 beta = min(best_value,beta)
 
                 if alpha >= beta:
                     break
 
-        policy = {str(i): 0 for i in range(9)}
-        policy[str(best_action)] = 1
+        return best_value
+    
+    mover = history_obj.player
+    best_action = None
 
-        history_key = ''.join(str(x) for x in position.history)
+    best_value = -math.inf
 
-        if mover == 'x':
-            strategy_dict_x[history_key] = policy
-        else:
-            strategy_dict_o[history_key] = policy
-                
-            return best_value
+    if mover == 'x':
+        for p in history_obj.get_valid_actions():
+            child = history_obj.update_history(p)
+            value = alphabeta(child, -math.inf, math.inf)
 
-    return alphabeta(history_obj,-math.inf,math.inf)
+            if value > best_value:
+                best_value = value
+                best_action = p
+    else:
+        best_value = math.inf
 
-    # TODO implement
+        for p in history_obj.get_valid_actions():
+            child = history_obj.update_history(p)
+            value = alphabeta(child, -math.inf, math.inf)
 
+            if value < best_value:
+                best_value = value
+                best_action = p
 
-def solve_tictactoe():
-    backward_induction(History())
-    with open('./policy_x.json', 'w') as f:
-        json.dump(strategy_dict_x, f)
-    with open('./policy_o.json', 'w') as f:
-        json.dump(strategy_dict_o, f)
-    return strategy_dict_x, strategy_dict_o
+    return best_action
+
+# def solve_tictactoe():
+#     backward_induction(History())
+#     with open('./policy_x.json', 'w') as f:
+#         json.dump(strategy_dict_x, f)
+#     with open('./policy_o.json', 'w') as f:
+#         json.dump(strategy_dict_o, f)
+#     return strategy_dict_x, strategy_dict_o
 
 
 if __name__ == "__main__":
     logging.info("Start")
-    solve_tictactoe()
+    # solve_tictactoe()
     logging.info("End")
+

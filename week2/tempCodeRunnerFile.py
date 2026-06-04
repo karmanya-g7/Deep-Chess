@@ -1,0 +1,2 @@
+if alpha >= beta:
+                    break

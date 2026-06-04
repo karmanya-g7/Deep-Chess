@@ -164,66 +164,45 @@ def backward_induction(history_obj):
     # actions. But since tictactoe is a PIEFG, there always exists an optimal deterministic strategy (SPNE). So your
     # policy will be something like this {"0": 1, "1": 0, "2": 0, "3": 0, "4": 0, "5": 0, "6": 0, "7": 0, "8": 0} where
     # "0" was the one of the best actions for the current player/history.
-    def alphabeta(position,alpha,beta):
-        if position.is_terminal_history():
-            return position.get_utility_given_terminal_history()
+
+    if history_obj.is_terminal_history():
+        return history_obj.get_utility_given_terminal_history()
+    
+    action_values = {}
+    for p in history_obj.get_valid_actions():
+        child = history_obj.update_history(p)
+        value = backward_induction(child)
+        action_values[p] = value
+    
+    mover = history_obj.player
+
+    if mover == 'x':
+        best_action = max(action_values,key = action_values.get)
+        best_value = action_values[best_action]
+    else:
+        best_action = min(action_values,key=action_values.get)
+        best_value = action_values[best_action]
+
+    policy = {str(i): 0 for i in range(9)}
+    policy[str(best_action)] = 1
+
+    history_key = ''.join(str(x) for x in history_obj.history)
+
+    if mover == 'x':
+        strategy_dict_x[history_key] = policy
+    else:
+        strategy_dict_o[history_key] = policy
         
-        mover = position.player
-
-        if mover == 'x':
-            best_value = -math.inf
-
-            for p in position.get_valid_actions():
-                child = position.update_history(p)
-                value = alphabeta(child,alpha,beta)
-
-                if value > best_value:
-                    best_value = value
-                    best_action = p
-
-                alpha = max(best_value,alpha)
-
-                if alpha >= beta:
-                    break
-                
-        else:
-            best_value = math.inf
-
-            for p in position.get_valid_actions():
-                child = position.update_history(p)
-                value = alphabeta(child,alpha,beta)
-
-                if value < best_value:
-                    best_value = value
-                    best_action = p
-
-                beta = min(best_value,beta)
-
-                if alpha >= beta:
-                    break
-
-        policy = {str(i): 0 for i in range(9)}
-        policy[str(best_action)] = 1
-
-        history_key = ''.join(str(x) for x in position.history)
-
-        if mover == 'x':
-            strategy_dict_x[history_key] = policy
-        else:
-            strategy_dict_o[history_key] = policy
-                
-            return best_value
-
-    return alphabeta(history_obj,-math.inf,math.inf)
+    return best_value
 
     # TODO implement
 
 
 def solve_tictactoe():
     backward_induction(History())
-    with open('./policy_x.json', 'w') as f:
+    with open('./policcy_x.json', 'w') as f:
         json.dump(strategy_dict_x, f)
-    with open('./policy_o.json', 'w') as f:
+    with open('./policcy_o.json', 'w') as f:
         json.dump(strategy_dict_o, f)
     return strategy_dict_x, strategy_dict_o
 
