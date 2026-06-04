@@ -211,8 +211,8 @@ def backward_induction(history_obj):
             strategy_dict_x[history_key] = policy
         else:
             strategy_dict_o[history_key] = policy
-                
-            return best_value
+            
+        return best_value
 
     return alphabeta(history_obj,-math.inf,math.inf)
 
